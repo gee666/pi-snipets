@@ -1,0 +1,19 @@
+{
+  "name": "pi-snipets",
+  "version": "0.1.0",
+  "description": "Expand loaded Pi prompt templates inline with /snipet:<name> and Tab.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "pi-package"
+  ],
+  "pi": {
+    "extensions": [
+      "./extensions/prompt-snippets.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  }
+}
