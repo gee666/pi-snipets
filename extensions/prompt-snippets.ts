@@ -24,7 +24,7 @@ export default function (pi: ExtensionAPI) {
 							(_match, target, fallback) => target ? fallback : "",
 						);
 					} catch (error) {
-						ctx.ui.notify(`Snippet /snipet:${command.name} unavailable: ${String(error)}`, "warning");
+						ctx.ui.notify(`Snippet snipet:${command.name} unavailable: ${String(error)}`, "warning");
 					}
 				}
 				loaded.set(command.name, snippet);
@@ -36,7 +36,7 @@ export default function (pi: ExtensionAPI) {
 		function completeOrExpand(editor: CustomEditor): boolean {
 			const { line, col } = editor.getCursor();
 			const text = editor.getLines()[line];
-			const match = text.slice(0, col).match(/\/snipet:([^\s]*)$/);
+			const match = text.slice(0, col).match(/(?<!\/)snipet:([^\s]*)$/);
 			// Only handle a token ending at the cursor, not the middle of a longer name.
 			if (!match || /\S/.test(text[col] ?? "")) return false;
 			// resources_discover adds prompts AFTER session_start. Follow that registry too.

@@ -10,7 +10,7 @@ pi install git:github.com/gee666/pi-snipets
 
 ## Usage
 
-Type `/snipet:<name>` anywhere in your draft, then press Tab.
+Type `snipet:<name>` anywhere in your draft, then press Tab.
 
 - A partial name completes to the matching name or common prefix. Press Tab again once the name is exact to expand it.
 - An exact name expands to the prompt body and leaves the cursor after it, preserving the rest of the draft.
