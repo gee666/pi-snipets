@@ -19,7 +19,7 @@ test("the package declares existing extension assets with a default factory", as
 		assert.ok(loaded && typeof loaded === "object" && "default" in loaded);
 		assert.equal(typeof loaded.default, "function");
 	}
-	for (const asset of ["README.md", "LICENSE"]) {
+	for (const asset of ["README.md", "EVERGREEN.md", "LICENSE"]) {
 		assert.ok(readFileSync(new URL(asset, root), "utf8").trim().length > 0);
 	}
 });

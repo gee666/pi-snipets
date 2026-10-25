@@ -15,13 +15,15 @@
   "files": [
     "extensions",
     "README.md",
+    "EVERGREEN.md",
     "LICENSE"
   ],
   "scripts": {
     "pretest": "npm install --save-dev --ignore-scripts @earendil-works/pi-coding-agent@latest @earendil-works/pi-tui@latest && npm run check",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "check": "tsc --noEmit",
-    "test:e2e": "python3 tests/e2e.py && SNIPPET_TEST_DEFAULT_EDITOR=1 python3 tests/e2e.py"
+    "test:e2e": "python3 tests/e2e.py && SNIPPET_TEST_DEFAULT_EDITOR=1 python3 tests/e2e.py",
+    "test:evergreen": "npm test && npm run test:e2e"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": ">=1.4.0",

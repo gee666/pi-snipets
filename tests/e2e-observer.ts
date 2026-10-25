@@ -20,14 +20,6 @@ export default function (pi: ExtensionAPI) {
 			}
 			return new SubmissionWrapper(tui, theme, keys);
 		});
-		ctx.ui.onTerminalInput(() => {
-			const timer = setTimeout(() => {
-				timers.delete(timer);
-				log("draft", ctx.ui.getEditorText());
-			}, 80);
-			timers.add(timer);
-			return undefined;
-		});
 		timers.add(setTimeout(() => log("ready"), 300));
 	});
 	pi.on("resources_discover", () => ({ promptPaths: [`${process.env.SNIPPET_TEST_DIR}/evergreen.md`] }));

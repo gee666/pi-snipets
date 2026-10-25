@@ -26,16 +26,18 @@ Uses Pi's loaded prompt templates, including configured and package prompts. Arg
 
 ```sh
 npm install --ignore-scripts
-npm test
+npm run test:evergreen
 ```
 
 `npm test` first installs `@earendil-works/pi-coding-agent@latest` and `@earendil-works/pi-tui@latest` as direct development dependencies with `--save-dev --ignore-scripts`. It then runs `npm run check` for strict typechecking before the tests. A failed refresh or typecheck stops the run. Commit the resulting manifest and lockfile changes. No separate linter is configured.
 
 Tests exercise argument defaults, partial and ambiguous completion, exact expansion, Unicode names, multiline insertion, suffix and cursor preservation, missing bodies, registry updates, and submission-state restoration. Editor tests use the installed Pi Editor with a headless terminal fixture. A package test checks declared extension files, their default factory exports, and required documentation assets.
 
-`npm run test:e2e` requires Python 3 and `PI_EVERGREEN_PI_BIN` pointing to the installed global Pi executable. It never downloads a runtime and fails rather than skipping missing prerequisites. It drives real PTY keys with this local extension explicitly loaded, both with the default editor and a prior custom submission wrapper. It checks late prompt discovery, missing-file warnings and cached failures, draft-only expansion, frontmatter removal, file caching, `/reload`, `/new`, two live provider turns per editor configuration, provider-bound request payloads, and saved session messages. Supported `before_provider_request` and `after_provider_response` observers verify actual transport activity, not reconstructed prompts. A temporary broken-insertion mutation was detected before any model call and reverted.
+`npm run test:evergreen` runs typechecking, unit/package/integration tests, then live e2e tests. The integration test loads the extension through Pi's SDK and checks TUI-only registration, winning prompt paths, ignored non-prompt commands, and missing-file warnings.
 
-The live model defaults to provider `openai`, model `gpt-6-luna`, reasoning `medium`; override with `PI_EVERGREEN_E2E_PROVIDER`, `PI_EVERGREEN_E2E_MODEL`, and `PI_EVERGREEN_E2E_REASONING`. Pi handles credentials normally; the test does not read credential files. Temporary sessions and request logs are deleted on completion. Run `npm test && npm run test:e2e` for full coverage. No separate build or lint task exists.
+`npm run test:e2e` requires Python 3, the globally installed Pi selected by `EVERGREEN_PI_BIN` (default: `pi` on PATH), and `EVERGREEN_E2E_MODEL` (Pi's `provider/model:thinking` syntax). It never downloads a runtime and fails rather than skipping missing prerequisites. Pi handles credentials normally; the test does not read credential files.
+
+Pi runs with stdin ignored and PTY output. A test-only preload marks stdin as a TTY to select interactive mode; a fixture feeds keys into the actual installed editor through public editor factories. This tests both the default editor and a prior submission wrapper, but not terminal byte decoding or global shortcuts. It checks late discovery, missing-file warnings and cached failures, draft-only expansion, frontmatter removal, caching, `/reload`, `/new`, two live model turns per configuration, provider-bound requests, and saved sessions. Successful assistant messages are mandatory; HTTP response statuses are checked when the transport emits them (WebSocket transports may not). Temporary sessions and request logs are deleted on completion. No separate build or lint task exists. See [EVERGREEN.md](EVERGREEN.md) for maintenance touchpoints.
 
 Unit tests additionally check remapped deletion keys, bypassed application shortcuts, active autocomplete dismissal, repeated edits, and restoration of an already-disabled submission state. Arbitrary third-party editor layouts, RPC/print sessions, compaction, transport retries, and Windows terminals are not covered by the live suite. This extension neither changes the system prompt nor hooks model/tool execution; its expanded text becomes an ordinary user message.
 
