@@ -33,7 +33,11 @@ npm test
 
 Tests exercise argument defaults, partial and ambiguous completion, exact expansion, Unicode names, multiline insertion, suffix and cursor preservation, missing bodies, registry updates, and submission-state restoration. Editor tests use the installed Pi Editor with a headless terminal fixture. A package test checks declared extension files, their default factory exports, and required documentation assets.
 
-These checks do not launch an interactive Pi session or validate prompt discovery, reload, or composition with other installed editor extensions. No manual terminal test is claimed.
+`npm run test:e2e` requires Python 3 and `PI_EVERGREEN_PI_BIN` pointing to the installed global Pi executable. It never downloads a runtime and fails rather than skipping missing prerequisites. It drives real PTY keys with this local extension explicitly loaded, both with the default editor and a prior custom submission wrapper. It checks late prompt discovery, missing-file warnings and cached failures, draft-only expansion, frontmatter removal, file caching, `/reload`, `/new`, two live provider turns per editor configuration, provider-bound request payloads, and saved session messages. Supported `before_provider_request` and `after_provider_response` observers verify actual transport activity, not reconstructed prompts. A temporary broken-insertion mutation was detected before any model call and reverted.
+
+The live model defaults to provider `openai`, model `gpt-6-luna`, reasoning `medium`; override with `PI_EVERGREEN_E2E_PROVIDER`, `PI_EVERGREEN_E2E_MODEL`, and `PI_EVERGREEN_E2E_REASONING`. Pi handles credentials normally; the test does not read credential files. Temporary sessions and request logs are deleted on completion. Run `npm test && npm run test:e2e` for full coverage. No separate build or lint task exists.
+
+Unit tests additionally check remapped deletion keys, bypassed application shortcuts, active autocomplete dismissal, repeated edits, and restoration of an already-disabled submission state. Arbitrary third-party editor layouts, RPC/print sessions, compaction, transport retries, and Windows terminals are not covered by the live suite. This extension neither changes the system prompt nor hooks model/tool execution; its expanded text becomes an ordinary user message.
 
 Pi supplies both packages at runtime. Their peer ranges start at 1.4.0, the tested baseline. Tests target only npm latest, not an older-version compatibility matrix.
 

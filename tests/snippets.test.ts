@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { Editor, TuiMainScreen, type EditorTheme, type Terminal } from "@earendil-works/pi-tui";
+import { Editor, TuiMainScreen, getKeybindings, setKeybindings, KeybindingsManager, TUI_KEYBINDINGS, type EditorTheme, type Terminal } from "@earendil-works/pi-tui";
 import { completeOrExpand, emptyPromptArgs } from "../extensions/snippets.ts";
 
 const identity = (text: string) => text;
@@ -100,6 +100,49 @@ test("completion uses the current registry on each Tab", () => {
 	current.set("review", { body: "new prompt" });
 	assert.equal(completeOrExpand(e, () => current), true);
 	assert.equal(e.getText(), "new prompt");
+});
+
+test("expansion bypasses app shortcuts and honors the explicit deletion fallback with remapped keys", () => {
+	const previous = getKeybindings();
+	setKeybindings(new KeybindingsManager(TUI_KEYBINDINGS, { "tui.editor.deleteCharBackward": [], "tui.input.submit": "shift+backspace" }));
+	try {
+		class AppEditor extends Editor {
+			override handleInput(): void { assert.fail("Expansion must not invoke application shortcuts"); }
+		}
+		const e = new AppEditor(new HeadlessTUI(terminal), theme);
+		e.setText("Keep snipet:review");
+		e.disableSubmit = true;
+		e.onSubmit = () => assert.fail("No submission allowed");
+		assert.equal(completeOrExpand(e, snippets(["review", "line1\nline2"])), true);
+		assert.equal(e.getText(), "Keep line1\nline2");
+		assert.equal(e.disableSubmit, true);
+	} finally {
+		setKeybindings(previous);
+	}
+});
+
+test("active autocomplete is dismissed without accepting or submitting a different suggestion", async () => {
+	const e = editor("snipet:review");
+	e.setAutocompleteProvider({
+		async getSuggestions() { return { prefix: "snipet:review", items: [{ value: "WRONG", label: "WRONG" }, { value: "OTHER", label: "OTHER" }] }; },
+		applyCompletion() { assert.fail("Expansion must not accept an unrelated autocomplete suggestion"); },
+	});
+	e.handleInput("\t");
+	await new Promise(resolve => setTimeout(resolve, 20));
+	assert.equal(completeOrExpand(e, snippets(["review", "right"])), true);
+	assert.equal(e.getText(), "right");
+	e.handleInput("!");
+	assert.equal(e.getText(), "right!");
+});
+
+test("repeated insertions remain draft edits and preserve earlier expanded content", () => {
+	const e = editor("Start snipet:review");
+	const get = snippets(["review", "done"]);
+	assert.equal(completeOrExpand(e, get), true);
+	e.insertTextAtCursor(" + snipet:review");
+	assert.equal(completeOrExpand(e, get), true);
+	assert.equal(e.getText(), "Start done + done");
+	assert.deepEqual(e.getCursor(), { line: 0, col: 17 });
 });
 
 test("submission state is restored after insertion fails", () => {
