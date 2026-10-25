@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { CustomEditor, parseFrontmatter, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { Editor, matchesKey } from "@earendil-works/pi-tui";
+import { matchesKey } from "@earendil-works/pi-tui";
+import { completeOrExpand, emptyPromptArgs } from "./snippets.ts";
 
 // getCommands exposes Pi's loaded prompt names and winning paths, not bodies.
 // Read only those paths; cache bodies until /reload. No separate prompt discovery.
@@ -19,10 +20,7 @@ export default function (pi: ExtensionAPI) {
 					try {
 						const { body } = parseFrontmatter(readFileSync(path, "utf8"));
 						// Pi substituteArgs with zero args, including non-recursive defaults.
-						snippet.body = body.replace(
-							/\$\{(\d+|ARGUMENTS|@):-([^}]*)\}|\$\{@:(\d+)(?::(\d+))?\}|\$(ARGUMENTS|@|\d+)/g,
-							(_match, target, fallback) => target ? fallback : "",
-						);
+						snippet.body = emptyPromptArgs(body);
 					} catch (error) {
 						ctx.ui.notify(`Snippet snipet:${command.name} unavailable: ${String(error)}`, "warning");
 					}
@@ -33,48 +31,15 @@ export default function (pi: ExtensionAPI) {
 		}
 		refreshPrompts();
 
-		function completeOrExpand(editor: CustomEditor): boolean {
-			const { line, col } = editor.getCursor();
-			const text = editor.getLines()[line];
-			const match = text.slice(0, col).match(/(?<!\/)snipet:([^\s]*)$/);
-			// Only handle a token ending at the cursor, not the middle of a longer name.
-			if (!match || /\S/.test(text[col] ?? "")) return false;
+		function getSnippets() {
 			// resources_discover adds prompts AFTER session_start. Follow that registry too.
 			refreshPrompts();
-			const name = match[1];
-			if (!snippets.has(name)) {
-				const matches = [...snippets.keys()].filter(candidate => candidate.startsWith(name));
-				if (!matches.length) return false;
-				const prefix = [...matches[0]];
-				while (!matches.every(candidate => candidate.startsWith(prefix.join("")))) prefix.pop();
-				// One match fills the name; several fill only their common prefix.
-				// Consume Tab even if the prefix cannot grow, never choose arbitrarily.
-				editor.insertTextAtCursor(prefix.join("").slice(name.length));
-				return true;
-			}
-			const body = snippets.get(name)!.body;
-			if (body === undefined) return false;
-			const disableSubmit = editor.disableSubmit;
-			editor.disableSubmit = true;
-			try {
-				// Base Editor input bypasses app shortcuts. Shift+Backspace is an explicit
-				// deletion fallback in Pi, independent of the configured Backspace binding.
-				Editor.prototype.handleInput.call(editor, "\x1b");
-				for (const _ of new Intl.Segmenter().segment(match[0])) {
-					Editor.prototype.handleInput.call(editor, "\x1b[127;2u");
-				}
-				editor.insertTextAtCursor(body);
-				Editor.prototype.handleInput.call(editor, "\x1b");
-				// Insertion leaves the cursor after the snippet and before the original suffix.
-			} finally {
-				editor.disableSubmit = disableSubmit;
-			}
-			return true;
+			return snippets;
 		}
 
 		class SnippetEditor extends CustomEditor {
 			handleInput(data: string): void {
-				if (matchesKey(data, "tab") && completeOrExpand(this)) {
+				if (matchesKey(data, "tab") && completeOrExpand(this, getSnippets)) {
 					this.tui.requestRender();
 					return;
 				}
@@ -94,7 +59,7 @@ export default function (pi: ExtensionAPI) {
 			}
 			const handleInput = editor.handleInput.bind(editor);
 			editor.handleInput = (data: string) => {
-				if (matchesKey(data, "tab") && completeOrExpand(editor)) {
+				if (matchesKey(data, "tab") && completeOrExpand(editor, getSnippets)) {
 					tui.requestRender();
 					return;
 				}
