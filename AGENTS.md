@@ -2,6 +2,11 @@
 
 Keep this root `AGENTS.md` tracked and current. Update it whenever the stack, commands, boundaries, test policy, or release process changes. Treat it as a maintenance requirement, not a one-time checklist.
 
+## Repository synchronization
+
+- Before starting any work, pull the latest changes from `origin` with `git pull --ff-only`. Preserve local edits; stop and resolve safely if the pull is blocked.
+- After each completed, validated piece of work, commit your changes and push to `origin` immediately. Work happens on multiple machines; do not leave finished work unsynchronized.
+
 ## Stack and boundaries
 
 This is an ESM TypeScript Pi editor extension. Keep Pi registration and prompt loading in `extensions/prompt-snippets.ts`, snippet transformations in `extensions/snippets.ts`, and regression tests in `tests/`. Use Pi's loaded prompt registry, not a second discovery system. Preserve editor composition and never submit a draft during expansion.
