@@ -1,6 +1,6 @@
 {
   "name": "pi-snipets",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Expand loaded Pi prompt templates inline with snipet:<name> and Tab.",
   "type": "module",
   "license": "MIT",
