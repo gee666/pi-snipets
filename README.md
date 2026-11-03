@@ -4,7 +4,7 @@ Insert loaded Pi prompt templates into the editor without submitting the draft.
 
 Requires Pi 1.4.0 or newer and Node.js 22.19 or newer.
 
-Tested against Pi 1.4.0
+Tested against Pi 1.5.0
 
 ## Install
 
