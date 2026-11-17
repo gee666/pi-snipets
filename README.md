@@ -4,7 +4,7 @@ Insert loaded Pi prompt templates into the editor without submitting the draft.
 
 Requires Pi 1.4.0 or newer and Node.js 22.19 or newer.
 
-Tested against Pi 1.5.0
+Tested against Pi 1.5.2
 
 ## Install
 
@@ -14,7 +14,7 @@ pi install git:github.com/gee666/pi-snipets
 
 ## Usage
 
-Type `snipet:<name>` anywhere in your draft, then press Tab.
+Type `snipet:<name>` or `/snipet:<name>` in your draft, then press Tab. For example, `/snipet:only` inserts the loaded `only` prompt without sending the draft.
 
 - A partial name completes to the matching name or common prefix. Press Tab again once the name is exact to expand it.
 - An exact name expands to the prompt body and leaves the cursor after it, preserving the rest of the draft.

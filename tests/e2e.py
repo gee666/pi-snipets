@@ -64,10 +64,10 @@ def draft(text):
 def expect_draft(start, expected):
     wait(lambda es: any(e['type'] == 'draft' and e['value'] == expected for e in es[start:]), 'draft ' + repr(expected), 15)
 def expand(expected):
-    start = draft('Before snipet:ever')
-    expect_draft(start, 'Before snipet:ever')
+    start = draft('Before /snipet:ever')
+    expect_draft(start, 'Before /snipet:ever')
     start = draft('\t')
-    expect_draft(start, 'Before snipet:evergreen')
+    expect_draft(start, 'Before /snipet:evergreen')
     start = draft('\t')
     expect_draft(start, expected)
 try:

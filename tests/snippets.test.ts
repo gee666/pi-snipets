@@ -59,8 +59,17 @@ test("ambiguous names complete only their common prefix", () => {
 	assert.equal(e.getText(), "snipet:revi");
 });
 
-test("unknown, slash-prefixed and mid-token names fall through unchanged", () => {
-	for (const text of ["snipet:missing", "/snipet:review", "ordinary text"]) {
+test("a slash-prefixed name completes with its slash and expands without it", () => {
+	const e = editor("/snipet:on");
+	const get = snippets(["only", "Only change the requested files."]);
+	assert.equal(completeOrExpand(e, get), true);
+	assert.equal(e.getText(), "/snipet:only");
+	assert.equal(completeOrExpand(e, get), true);
+	assert.equal(e.getText(), "Only change the requested files.");
+});
+
+test("unknown names, paths and mid-token text fall through unchanged", () => {
+	for (const text of ["snipet:missing", "/snipet:missing", "/review", "dir/snipet:review", "ordinary text"]) {
 		const e = editor(text);
 		assert.equal(completeOrExpand(e, snippets(["review", "body"])), false);
 		assert.equal(e.getText(), text);
@@ -122,9 +131,9 @@ test("expansion bypasses app shortcuts and honors the explicit deletion fallback
 });
 
 test("active autocomplete is dismissed without accepting or submitting a different suggestion", async () => {
-	const e = editor("snipet:review");
+	const e = editor("/snipet:review");
 	e.setAutocompleteProvider({
-		async getSuggestions() { return { prefix: "snipet:review", items: [{ value: "WRONG", label: "WRONG" }, { value: "OTHER", label: "OTHER" }] }; },
+		async getSuggestions() { return { prefix: "/snipet:review", items: [{ value: "WRONG", label: "WRONG" }, { value: "OTHER", label: "OTHER" }] }; },
 		applyCompletion() { assert.fail("Expansion must not accept an unrelated autocomplete suggestion"); },
 	});
 	e.handleInput("\t");

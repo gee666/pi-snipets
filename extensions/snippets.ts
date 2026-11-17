@@ -15,7 +15,8 @@ export function completeOrExpand(
 	const { line, col } = editor.getCursor();
 	const text = editor.getLines()[line];
 	if (text === undefined) return false;
-	const match = text.slice(0, col).match(/(?<!\/)snipet:([^\s]*)$/);
+	// Accept a leading slash on its own token, not as part of a path.
+	const match = text.slice(0, col).match(/(?:(?<!\S)\/|(?<!\/))snipet:(\S*)$/);
 	// Only handle a token ending at the cursor, not the middle of a longer name.
 	if (!match || /\S/.test(text[col] ?? "")) return false;
 	const snippets = getSnippets();
