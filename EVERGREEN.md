@@ -22,6 +22,9 @@ only prompt commands are read. `parseFrontmatter` removes metadata.
 `disableSubmit`, and render requests implement draft editing.
 The registry is refreshed on Tab because `resources_discover` follows startup.
 Bodies and failed reads are cached until reload or a different winning path.
+Pi 1.6.0 compatibility: no render overrides or mutation of cached render arrays;
+unhandled keys (including completion-menu Enter) still reach the prior editor.
+Reload's `session_start` reinstalls the editor and clears the snippet cache.
 
 ## Internal Pi APIs
 None in runtime code: no deep imports, private fields, or undocumented Pi APIs.
